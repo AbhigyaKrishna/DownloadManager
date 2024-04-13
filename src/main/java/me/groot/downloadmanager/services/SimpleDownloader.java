@@ -16,11 +16,11 @@ public class SimpleDownloader extends Downloader {
     public void download() {
         System.out.println("Downloading " + url + " to " + downloadPath);
         try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(downloadPath.toFile())) {
+             FileOutputStream fos = new FileOutputStream(downloadPath.toFile())) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
+                fos.write(dataBuffer, 0, bytesRead);
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to download file", e);

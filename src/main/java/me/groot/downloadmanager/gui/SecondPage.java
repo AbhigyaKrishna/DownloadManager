@@ -5,15 +5,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class SecondPage {
-    public JFrame frame;
+public class SecondPage extends Screen {
     public JPanel panel;
     public JTextField linkbox;
     public JLabel transferRateLabel, timeLeftLabel, filesizeLabel, statusLabel;
 
     public SecondPage() {
-        frame = new JFrame("DOWNLOADING PAGE");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        super("DOWNLOADING PAGE");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         panel = new JPanel();
         panel.setLayout(new GridLayout(5, 2, 5, 5));
@@ -57,13 +56,13 @@ public class SecondPage {
         });
         panel.add(progressResumeButton);
 
-        frame.add(panel);
+        add(panel);
 
 
-        frame.setBackground(Color.cyan);
+        setBackground(Color.cyan);
         panel.setBackground(Color.DARK_GRAY);
-        frame.setSize(400, 300);
-        frame.setVisible(true);
+        setSize(400, 300);
+        setVisible(true);
     }
 
 }
