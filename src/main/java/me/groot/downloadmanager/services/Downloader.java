@@ -18,11 +18,11 @@ public abstract class Downloader {
 
     public URL getUrl() {
         return url;
-    }
+    }  //constructor that tells about the url getting downloaded
 
     public Path getDownloadPath() {
         return downloadPath;
-    }
+    } //constructor that tells about the path getting downloaded
 
     public Progress getProgress() {
         return progress;

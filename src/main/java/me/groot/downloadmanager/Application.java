@@ -1,11 +1,20 @@
 package me.groot.downloadmanager;
 
 import me.groot.downloadmanager.gui.FrontPage;
+import me.groot.downloadmanager.gui.HistoryPage;
+import me.groot.downloadmanager.gui.Screen;
 import me.groot.downloadmanager.gui.SecondPage;
 
 public class Application {
     public static void main(String[] args) {
-        new FrontPage();
-        new SecondPage();
+
+        Screen obj = new SecondPage();
+        obj.initialize();
+        obj.setVisible(true);
+
+
+
+
+
     }
 }
