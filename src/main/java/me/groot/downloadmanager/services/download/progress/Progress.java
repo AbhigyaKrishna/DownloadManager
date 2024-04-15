@@ -1,16 +1,16 @@
-package me.groot.downloadmanager.services;
+package me.groot.downloadmanager.services.download.progress;
 
 import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class Progress extends Observable<Double> {
+public class Progress extends AbstractProgress {
 
-    private final Set<ProgressWatcher> watchers = new HashSet<>();
+    private final Set<ProgressWatcher> watchers = ConcurrentHashMap.newKeySet();
     private double progress = 0.0; // 0.0-1.0
 
     @Override
@@ -33,6 +33,17 @@ public class Progress extends Observable<Double> {
         setProgress(progress + increment);
     }
 
+    @Override
+    public void handleError(Throwable e) {
+        watchers.forEach(watcher -> watcher.observer.onError(e));
+        watchers.clear();
+    }
+
+    @Override
+    public void disposeAll() {
+        new HashSet<>(watchers).forEach(ProgressWatcher::dispose);
+    }
+
     final class ProgressWatcher implements Disposable {
         private final Observer<? super Double> observer;
 
@@ -42,8 +53,8 @@ public class Progress extends Observable<Double> {
 
         public void update() {
             if (isDisposed()) return;
-            if (progress >= 1.0) {
-                observer.onComplete();
+            if (isComplete()) {
+                dispose();
                 return;
             }
 
@@ -52,7 +63,9 @@ public class Progress extends Observable<Double> {
 
         @Override
         public void dispose() {
-            watchers.remove(this);
+            if (watchers.remove(this)) {
+                observer.onComplete();
+            }
         }
 
         @Override
@@ -60,5 +73,4 @@ public class Progress extends Observable<Double> {
             return !watchers.contains(this);
         }
     }
-
 }
