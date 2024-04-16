@@ -11,11 +11,11 @@ import java.net.URLConnection;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ResumableDownloader extends Downloader<DifferenceProgress> implements Resumable {
+public class ResumableDownloadStrategy extends DownloadStrategy<DifferenceProgress> implements Resumable {
 
     private final AtomicBoolean paused = new AtomicBoolean(false);
 
-    public ResumableDownloader(URL url, Path downloadPath) {
+    public ResumableDownloadStrategy(URL url, Path downloadPath) {
         super(url, downloadPath, new DifferenceProgress());
     }
 
@@ -58,7 +58,7 @@ public class ResumableDownloader extends Downloader<DifferenceProgress> implemen
             progress.handleError(e);
             throw new RuntimeException(e);
         }
-        progress.disposeAll();
+        progress.complete();
         System.out.println("Downloaded " + url + " to " + downloadPath);
     }
 

@@ -1,9 +1,8 @@
 package me.groot.downloadmanager.services.download.progress;
 
-import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Observer;
+import reactor.core.publisher.Flux;
 
-public class DifferenceProgress extends AbstractProgress {
+public class DifferenceProgress implements IProgress {
 
     private long max;
     private long current;
@@ -16,11 +15,6 @@ public class DifferenceProgress extends AbstractProgress {
 
     public DifferenceProgress() {
         this(1);
-    }
-
-    @Override
-    protected void subscribeActual(@NonNull Observer<? super Double> observer) {
-        internal.subscribe(observer);
     }
 
     public long getMax() {
@@ -62,8 +56,7 @@ public class DifferenceProgress extends AbstractProgress {
     }
 
     @Override
-    public void disposeAll() {
-        internal.disposeAll();
+    public Flux<Double> flux() {
+        return internal.flux();
     }
-
 }

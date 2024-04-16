@@ -7,13 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SimpleResumableDownloader extends Downloader<DifferenceProgress> implements Resumable {
+public class SimpleDownloadStrategy extends DownloadStrategy<DifferenceProgress> {
 
-    private final AtomicBoolean paused = new AtomicBoolean(false);
-
-    public SimpleResumableDownloader(URL url, Path downloadPath) {
+    public SimpleDownloadStrategy(URL url, Path downloadPath) {
         super(url, downloadPath, new DifferenceProgress());
     }
 
@@ -33,34 +30,13 @@ public class SimpleResumableDownloader extends Downloader<DifferenceProgress> im
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fos.write(dataBuffer, 0, bytesRead);
                 progress.inc(bytesRead);
-                while (paused.get()) {
-                    Thread.sleep(500);
-                }
             }
         } catch (IOException e) {
             progress.handleError(e);
             throw new RuntimeException("Failed to download file", e);
-        } catch (InterruptedException e) {
-            progress.handleError(e);
-            throw new RuntimeException(e);
         }
-        progress.disposeAll();
+        progress.complete();
         System.out.println("Downloaded " + url + " to " + downloadPath);
-    }
-
-    @Override
-    public boolean isPaused() {
-        return paused.get();
-    }
-
-    @Override
-    public void pause() {
-        paused.set(true);
-    }
-
-    @Override
-    public void resume() {
-        paused.set(false);
     }
 
 }

@@ -1,19 +1,19 @@
 package me.groot.downloadmanager.services.download;
 
-import me.groot.downloadmanager.services.download.progress.AbstractProgress;
+import me.groot.downloadmanager.services.download.progress.IProgress;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
 
-public abstract class Downloader<P extends AbstractProgress> {
+public abstract class DownloadStrategy<P extends IProgress> {
 
     protected final URL url;
     protected final Path downloadPath;
     protected final P progress;
     private DownloadInfo info;
 
-    public Downloader(URL url, Path downloadPath, P progress) {
+    public DownloadStrategy(URL url, Path downloadPath, P progress) {
         this.url = url;
         this.downloadPath = downloadPath;
         this.progress = progress;

@@ -11,20 +11,18 @@ public class SecondPage extends Screen {
 
     @Override
     public void initialize() {
-
-
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-// Create labels panel
+        // Create labels panel
         JPanel labelsPanel = new JPanel();
         labelsPanel.setLayout(new GridLayout(0, 1));
         labelsPanel.setBackground(new Color(216,209,220));
         panel.add(labelsPanel);
 
-// Add labels
+        // Add labels
         JLabel linkbox = new JLabel("LINK:");
         linkbox.setSize(400, 25);
         labelsPanel.add(linkbox);
@@ -41,7 +39,7 @@ public class SecondPage extends Screen {
         JLabel statusLabel = new JLabel("Status: ");
         labelsPanel.add(statusLabel);
 
-// Create buttons panel with FlowLayout
+        // Create buttons panel with FlowLayout
 
         JPanel buttonsPanel = new JPanel();
 
@@ -50,7 +48,7 @@ public class SecondPage extends Screen {
 
         panel.add(buttonsPanel);
 
-// Create buttons with smaller preferred size and check minimum size
+        // Create buttons with smaller preferred size and check minimum size
         JButton pauseButton = new JButton("<html><font size='2'>Pause</font></html>");
         pauseButton.setPreferredSize(new Dimension(80, 30));
         Dimension minSize = pauseButton.getMinimumSize();
@@ -96,7 +94,6 @@ public class SecondPage extends Screen {
         });
 
         add(panel);
-
 
         setBackground(new Color(170, 132, 220));
         panel.setBackground(new Color(170, 132, 220));

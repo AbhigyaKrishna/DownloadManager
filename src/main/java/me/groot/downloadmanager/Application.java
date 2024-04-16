@@ -1,20 +1,22 @@
 package me.groot.downloadmanager;
 
-import me.groot.downloadmanager.gui.FrontPage;
 import me.groot.downloadmanager.gui.HistoryPage;
 import me.groot.downloadmanager.gui.Screen;
-import me.groot.downloadmanager.gui.SecondPage;
+
+import javax.swing.*;
 
 public class Application {
     public static void main(String[] args) {
-
-        Screen obj = new FrontPage();
-        obj.initialize();
-        obj.setVisible(true);
-
-
-
-
-
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException |
+                 IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        SwingUtilities.invokeLater(() -> {
+            Screen obj = new HistoryPage();
+            obj.initialize();
+            obj.setVisible(true);
+        });
     }
 }
