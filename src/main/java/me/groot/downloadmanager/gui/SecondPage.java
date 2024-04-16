@@ -21,6 +21,7 @@ public class SecondPage extends Screen {
 // Create labels panel
         JPanel labelsPanel = new JPanel();
         labelsPanel.setLayout(new GridLayout(0, 1));
+        labelsPanel.setBackground(new Color(216,209,220));
         panel.add(labelsPanel);
 
 // Add labels
@@ -44,7 +45,9 @@ public class SecondPage extends Screen {
 
         JPanel buttonsPanel = new JPanel();
 
-        buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 2, 2));  // Adjust alignment and spacing
+        buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 2, 2));// Adjust alignment and spacing
+        buttonsPanel.setBackground(new Color(216,209,220));
+
         panel.add(buttonsPanel);
 
 // Create buttons with smaller preferred size and check minimum size

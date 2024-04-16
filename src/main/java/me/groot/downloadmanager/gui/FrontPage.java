@@ -55,6 +55,7 @@ public class FrontPage extends Screen {
         gbc.gridwidth = 1; // Reset gridwidth
         panel.add(linkbox, gbc);
 
+
         JTextField fileNameField = new JTextField(32);
         fileNameField.setHorizontalAlignment(JTextField.CENTER);
         fileNameField.setPreferredSize(new Dimension(300, 30)); // Set preferred size

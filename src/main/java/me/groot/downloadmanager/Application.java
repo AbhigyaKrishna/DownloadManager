@@ -8,7 +8,7 @@ import me.groot.downloadmanager.gui.SecondPage;
 public class Application {
     public static void main(String[] args) {
 
-        Screen obj = new SecondPage();
+        Screen obj = new FrontPage();
         obj.initialize();
         obj.setVisible(true);
 
