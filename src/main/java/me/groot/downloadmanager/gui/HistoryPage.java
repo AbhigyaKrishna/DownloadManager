@@ -20,7 +20,7 @@ public class HistoryPage extends Screen {
 
 
         // Data for the table
-        Object[][] data = {
+        String [][] data = {
                 {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
                 {"https://www.yahoo.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
                 {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
@@ -45,7 +45,9 @@ public class HistoryPage extends Screen {
 
         // Set grid lines visibility
         table.setShowGrid(true);
-        table.setGridColor(Color.BLACK);
+        table.setGridColor(new Color(170, 132, 220));
+        table.setCellSelectionEnabled(false);
+        table.setDragEnabled(false);
 
         // Set column widths
         table.getColumnModel().getColumn(0).setPreferredWidth(600); // URL column
@@ -63,7 +65,7 @@ public class HistoryPage extends Screen {
 
         // Custom renderer for alternating row colors
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            Color alternateColor = new Color(177,174,176); // Light gray color for alternate rows
+            Color alternateColor = new Color(209,185,225); // Light gray color for alternate rows
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -71,7 +73,7 @@ public class HistoryPage extends Screen {
                 if (!isSelected && row % 2 == 0) {
                     c.setBackground(alternateColor);
                 } else {
-                    c.setBackground(Color.WHITE);
+                    c.setBackground(new Color(188,151,213));
                 }
                 return c;
             }
@@ -101,6 +103,8 @@ public class HistoryPage extends Screen {
         // Pack the frame and make it visible
         pack();
         setLocationRelativeTo(null); // Center the frame
+        setBackground(new Color(170, 132, 220));
+        setSize(400, 300);
 
 
     }

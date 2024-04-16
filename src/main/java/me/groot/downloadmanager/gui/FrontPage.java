@@ -2,8 +2,12 @@ package me.groot.downloadmanager.gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.net.URL;
+
 
 public class FrontPage extends Screen {
     public FrontPage(){
@@ -83,6 +87,8 @@ public class FrontPage extends Screen {
         gbc.gridy = 3; // Below the linkbox
         panel.add(download, gbc);
 
+        download.addActionListener(new DownloadButtonListener(linkbox,this));
+
         JButton history = new JButton("<html><font size='4'>History</font></html>");
         history.setPreferredSize(new Dimension(120, 40)); // Set preferred size
         gbc.gridx = 0; // Left of the linkbox
@@ -95,6 +101,33 @@ public class FrontPage extends Screen {
         panel.setBackground(new Color(170,132,220));
         pack(); // Adjusts the frame size to fit the components
         setLocationRelativeTo(null); // Centers the frame on the screen
-        //setVisible(true);
+
+
+
+    }
+
+    final static class DownloadButtonListener implements ActionListener {
+
+        private final JTextField linkbox;
+
+        //private final JTextField fileNameField;
+        private final JFrame parentcomponent;
+
+        public DownloadButtonListener(JTextField linkbox,JFrame parentcomponent) {
+            this.linkbox = linkbox;
+            this.parentcomponent = parentcomponent;
+        }
+
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(linkbox.getText().isEmpty()){
+                JOptionPane.showMessageDialog(parentcomponent,"Enter a valid URL");
+                return;
+            }
+
+
+
+        }
     }
 }
