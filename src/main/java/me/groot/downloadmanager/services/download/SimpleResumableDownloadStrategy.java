@@ -1,7 +1,5 @@
 package me.groot.downloadmanager.services.download;
 
-import me.groot.downloadmanager.services.download.progress.DifferenceProgress;
-
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,24 +7,18 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SimpleResumableDownloadStrategy extends DownloadStrategy<DifferenceProgress> implements Resumable {
+public class SimpleResumableDownloadStrategy extends SimpleDownloadStrategy implements Resumable {
 
     private final AtomicBoolean paused = new AtomicBoolean(false);
 
     public SimpleResumableDownloadStrategy(URL url, Path downloadPath) {
-        super(url, downloadPath, new DifferenceProgress());
-    }
-
-    @Override
-    public void initialize() {
-        DownloadInfo info = getInfo();
-        progress.setMax(info.length());
+        super(url, downloadPath);
     }
 
     @Override
     public void download() {
         System.out.println("Downloading " + url + " to " + downloadPath);
-        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+        try (BufferedInputStream in = new BufferedInputStream(openConnection().getInputStream());
              FileOutputStream fos = new FileOutputStream(downloadPath.toFile())) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;

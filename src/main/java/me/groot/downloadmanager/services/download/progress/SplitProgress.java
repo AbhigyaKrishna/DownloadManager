@@ -12,13 +12,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SplitProgress implements IProgress {
 
-    private final Set<Progress> internals = ConcurrentHashMap.newKeySet();
-    private final List<Boolean> completed = new ArrayList<>();
+    private final Set<IProgress> internals = ConcurrentHashMap.newKeySet();
+    private final List<Object> completed = new ArrayList<>();
     private Sinks.Many<Double> sink;
     private Flux<Double> flux;
 
-    public void addProgress(Progress progress) {
+    public void addProgress(IProgress progress) {
         internals.add(progress);
+        if (progress.isComplete()) {
+            completed.add(new Object());
+            return;
+        }
         progress.flux().subscribe(new InternalSubscriber());
     }
 
@@ -77,7 +81,7 @@ public class SplitProgress implements IProgress {
 
         @Override
         public void onComplete() {
-            completed.add(true);
+            completed.add(new Object());
             checkComplete();
         }
     }

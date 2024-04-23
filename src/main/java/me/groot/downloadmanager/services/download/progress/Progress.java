@@ -10,14 +10,14 @@ public class Progress implements IProgress {
     private Flux<Double> flux;
 
     public double getProgress() {
-        return progress;
+        return Math.max(progress, 1.0);
     }
 
     public void setProgress(double progress) {
+        this.progress = progress;
         if (flux != null) {
             sink.tryEmitNext(progress);
         }
-        this.progress = progress;
     }
 
     public void inc(double increment) {
