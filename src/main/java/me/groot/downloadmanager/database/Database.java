@@ -1,14 +1,13 @@
 package me.groot.downloadmanager.database;
 
-import io.r2dbc.spi.ConnectionFactories;
+import io.r2dbc.h2.H2ConnectionConfiguration;
+import io.r2dbc.h2.H2ConnectionFactory;
+import io.r2dbc.h2.H2ConnectionOption;
 import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.ConnectionFactoryOptions;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DefaultConfiguration;
-
-import java.time.Duration;
 
 public class Database {
 
@@ -21,15 +20,13 @@ public class Database {
     }
 
     public void create() {
-        factory = ConnectionFactories.get(
-                ConnectionFactoryOptions.builder()
-                        .option(ConnectionFactoryOptions.HOST, settings.getHost())
-                        .option(ConnectionFactoryOptions.PORT, settings.getPort())
-                        .option(ConnectionFactoryOptions.DATABASE, settings.getDatabase())
-                        .option(ConnectionFactoryOptions.USER, settings.getUser())
-                        .option(ConnectionFactoryOptions.PASSWORD, settings.getPassword())
-                        .option(ConnectionFactoryOptions.CONNECT_TIMEOUT, Duration.ofSeconds(30))
-                        .option(ConnectionFactoryOptions.DRIVER, "org.h2.Driver")
+        factory = new H2ConnectionFactory(
+                H2ConnectionConfiguration.builder()
+                        .file(settings.file())
+                        .username(settings.user())
+                        .password(settings.password())
+                        .property(H2ConnectionOption.DB_CLOSE_DELAY, "-1")
+                        .property(H2ConnectionOption.DB_CLOSE_ON_EXIT, "true")
                         .build()
         );
     }
