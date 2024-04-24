@@ -50,14 +50,15 @@ public class SplitProgress implements IProgress {
     @Override
     public Flux<Double> flux() {
         if (flux == null) {
-            sink = Sinks.many().replay().latest();
+            sink = Sinks.many().multicast().onBackpressureBuffer();
             flux = sink.asFlux();
         }
         return flux;
     }
 
     private void checkComplete() {
-        if (completed.size() == internals.size()) {
+        System.out.println(completed.size() + " - " + internals.size());
+        if (sink != null && completed.size() == internals.size()) {
             sink.tryEmitComplete();
         }
     }
@@ -71,7 +72,7 @@ public class SplitProgress implements IProgress {
         @Override
         public void onNext(Double o) {
             if (flux != null) {
-                sink.tryEmitNext(o);
+                sink.tryEmitNext(getProgress());
             }
         }
 

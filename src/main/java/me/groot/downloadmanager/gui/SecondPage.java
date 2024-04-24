@@ -1,10 +1,12 @@
 package me.groot.downloadmanager.gui;
 
+import me.groot.downloadmanager.database.Database;
+import me.groot.downloadmanager.jooq.codegen.Tables;
 import me.groot.downloadmanager.services.download.DownloadStrategy;
-import me.groot.downloadmanager.services.download.ResumableDownloadStrategy;
 import me.groot.downloadmanager.services.download.SplitDownloadStrategy;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.Mono;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,19 +16,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.time.LocalDateTime;
 
 public class SecondPage extends Screen {
     private final String url;
     private final String filename;
     private final SplitDownloadStrategy strategy;
+    private final Database db;
     private final Thread thread;
 
-    public SecondPage(String url,String filename) {
-        super("DOWNLOAD MANAGER");
+    public SecondPage(String url, String filename, Database db) {
+        super("Downloading...");
         this.filename = filename;
         this.url = url;
+        this.db = db;
         try {
             this.strategy = new SplitDownloadStrategy(new URI(url).toURL(), Path.of(filename));
             strategy.initialize();
@@ -46,7 +49,7 @@ public class SecondPage extends Screen {
         // Create labels panel
         JPanel labelsPanel = new JPanel();
         labelsPanel.setLayout(new GridLayout(0, 1));
-        labelsPanel.setBackground(new Color(216,209,220));
+        labelsPanel.setBackground(new Color(216, 209, 220));
         panel.add(labelsPanel);
 
         // Add labels
@@ -61,7 +64,7 @@ public class SecondPage extends Screen {
         JLabel timeLeftLabel = new JLabel("Time Left: ");
         labelsPanel.add(timeLeftLabel);
 
-        JLabel filesizeLabel = new JLabel("File Size: "+ ((double) info.length()/1e+6)+ "MB");
+        JLabel filesizeLabel = new JLabel("File Size: " + ((double) info.length() / 1e+6) + " MB");
         labelsPanel.add(filesizeLabel);
 
         JLabel statusLabel = new JLabel("Status: Downloading");
@@ -72,7 +75,7 @@ public class SecondPage extends Screen {
         JPanel buttonsPanel = new JPanel();
 
         buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 2, 2));// Adjust alignment and spacing
-        buttonsPanel.setBackground(new Color(216,209,220));
+        buttonsPanel.setBackground(new Color(216, 209, 220));
 
         panel.add(buttonsPanel);
 
@@ -102,14 +105,12 @@ public class SecondPage extends Screen {
         buttonsPanel.add(progressCancelButton);
 
 
-        JProgressBar jb = new JProgressBar(0, 200);
+        JProgressBar jb = new JProgressBar(0, 100);
         jb.setBounds(80, 80, 320, 60);
         jb.setValue(1);
         jb.setStringPainted(true);
         panel.add(jb);
-        strategy.getProgress().flux().onBackpressureLatest().subscribe(new Subscribers(jb,this,statusLabel));
-
-
+        strategy.getProgress().flux().onBackpressureLatest().subscribe(new Subscribers(jb, this, statusLabel));
 
         pauseButton.addActionListener(e -> {
             if (strategy.getProgress().isComplete())
@@ -145,22 +146,17 @@ public class SecondPage extends Screen {
 
         setSize(400, 300);
         setLocationRelativeTo(null);
-
+        thread.start();
     }
 
-    /*private void task(JLabel ){
-        service.submit(() -> {
+    final class Subscribers implements Subscriber<Double> {
 
-        })
-    }*/
-
-    static final class Subscribers implements Subscriber<Double> {
         private final JProgressBar jb;
-
         private Subscription s;
         private final JFrame parentcomponent;
         private final JLabel status;
-        public Subscribers(JProgressBar jb,JFrame parentcomponent, JLabel status){
+
+        public Subscribers(JProgressBar jb, JFrame parentcomponent, JLabel status) {
             this.parentcomponent = parentcomponent;
             this.jb = jb;
             this.status = status;
@@ -174,19 +170,27 @@ public class SecondPage extends Screen {
 
         @Override
         public void onNext(Double aDouble) {
-           jb.setValue(aDouble.intValue());
-           s.request(1);
+            jb.setValue((int) (aDouble * 100));
+            s.request(1);
         }
 
         @Override
         public void onError(Throwable t) {
-            JOptionPane.showMessageDialog(parentcomponent,t.getMessage());
+            JOptionPane.showMessageDialog(parentcomponent, t.getMessage());
         }
 
         @Override
         public void onComplete() {
             jb.setValue(100);
             status.setText("Status: Completed");
+            Mono.from(db.getContext().insertInto(Tables.HISTORY)
+                    .set(Tables.HISTORY.FILE_NAME, filename)
+                    .set(Tables.HISTORY.FILE_URL, url)
+                    .set(Tables.HISTORY.FILE_LOCATION, new File(filename).getAbsolutePath())
+                    .set(Tables.HISTORY.FILE_SIZE, strategy.getInfo().length())
+                    .set(Tables.HISTORY.FILE_STATUS, "Done")
+                    .set(Tables.HISTORY.FILE_DATETIME, LocalDateTime.now())
+            ).subscribe();
         }
     }
 }

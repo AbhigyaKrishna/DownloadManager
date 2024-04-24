@@ -3,16 +3,16 @@ package me.groot.downloadmanager;
 import me.groot.downloadmanager.database.Database;
 import me.groot.downloadmanager.database.DatabaseSettings;
 import me.groot.downloadmanager.gui.FrontPage;
-import me.groot.downloadmanager.gui.HistoryPage;
 import me.groot.downloadmanager.gui.Screen;
-import me.groot.downloadmanager.gui.SecondPage;
 
 import javax.swing.*;
+import java.io.File;
 
 public class Application {
 
     public static void main(String[] args) {
-        Database db = new Database(new DatabaseSettings("database/database","SA",""));
+        Database db = new Database(new DatabaseSettings(new File("database/database").getAbsolutePath(),"SA",""));
+        db.migrate();
         db.create();
 
         try {

@@ -6,9 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +32,7 @@ public class SplitDownloadStrategy extends DownloadStrategy<SplitProgress> imple
     public SplitDownloadStrategy(URL url, Path downloadPath, int parts) {
         super(url, downloadPath, new SplitProgress());
         this.parts = parts;
-        this.partsDir = downloadPath.getParent().resolve( "." + downloadPath.getFileName() + ".parts");
+        this.partsDir = Path.of( "." + downloadPath.getFileName() + ".parts");
         this.internals = new ArrayList<>(parts);
         this.executor = Executors.newFixedThreadPool(parts);
     }
@@ -103,6 +106,26 @@ public class SplitDownloadStrategy extends DownloadStrategy<SplitProgress> imple
         } catch (InterruptedException ignored) {
         }
         executor.shutdown();
+        try {
+            complete();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to complete download", e);
+        }
+        System.out.println("Download completed");
+    }
+
+    public void complete() throws IOException {
+        File original = downloadPath.toFile();
+        if (original.exists())
+            original.delete();
+        original.createNewFile();
+        for (File file : Objects.requireNonNull(partsDir.toFile().listFiles())) {
+            System.out.println("Appending " + file.getName() + " to " + original.getName());
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            Files.write(original.toPath(), bytes, StandardOpenOption.APPEND);
+            file.delete();
+        }
+        Files.delete(partsDir);
     }
 
     @Override

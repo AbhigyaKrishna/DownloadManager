@@ -10,18 +10,26 @@ public class Progress implements IProgress {
     private Flux<Double> flux;
 
     public double getProgress() {
-        return Math.max(progress, 1.0);
+        return Math.min(progress, 1.0);
     }
 
     public void setProgress(double progress) {
         this.progress = progress;
-        if (flux != null) {
+        if (sink != null) {
             sink.tryEmitNext(progress);
         }
     }
 
     public void inc(double increment) {
         setProgress(progress + increment);
+    }
+
+    @Override
+    public void complete() {
+        IProgress.super.complete();
+        if (sink != null) {
+            sink.tryEmitComplete();
+        }
     }
 
     @Override

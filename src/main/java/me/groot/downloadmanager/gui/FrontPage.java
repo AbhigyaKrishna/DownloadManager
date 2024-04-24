@@ -8,12 +8,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.net.URL;
 
 public class FrontPage extends Screen {
     private final Database db;
     public FrontPage(Database db){
-        super("DOWNLOAD MANAGER");
+        super("Download Manager");
         this.db = db;
     }
     @Override
@@ -90,7 +89,7 @@ public class FrontPage extends Screen {
         gbc.gridy = 3; // Below the linkbox
         panel.add(download, gbc);
 
-        download.addActionListener(new DownloadButtonListener(linkbox,this, fileNameField));
+        download.addActionListener(new DownloadButtonListener(linkbox,this, fileNameField, db));
 
         JButton history = new JButton("<html><font size='4'>History</font></html>");
         history.setPreferredSize(new Dimension(120, 40)); // Set preferred size
@@ -118,11 +117,13 @@ public class FrontPage extends Screen {
         private final JTextField linkbox;
         private final JTextField fileNameField;
         private final JFrame parentcomponent;
+        private final Database db;
 
-        public DownloadButtonListener(JTextField linkbox,JFrame parentcomponent,JTextField fileNameField) {
+        public DownloadButtonListener(JTextField linkbox,JFrame parentcomponent,JTextField fileNameField, Database db) {
             this.linkbox = linkbox;
             this.parentcomponent = parentcomponent;
             this.fileNameField = fileNameField;
+            this.db = db;
         }
 
         @Override
@@ -136,7 +137,7 @@ public class FrontPage extends Screen {
                 return;
             }
 
-            SecondPage sp = new SecondPage(linkbox.getText(),fileNameField.getText());
+            SecondPage sp = new SecondPage(linkbox.getText(),fileNameField.getText(), db);
             sp.initialize();
             sp.setVisible(true);
         }

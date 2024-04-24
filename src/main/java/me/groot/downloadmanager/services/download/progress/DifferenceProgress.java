@@ -31,7 +31,7 @@ public class DifferenceProgress implements IProgress {
 
     public void setCurrent(long current) {
         this.current = current;
-        internal.setProgress((double) current / max);
+        internal.setProgress((double) current / (double) max);
     }
 
     @Override
@@ -41,13 +41,18 @@ public class DifferenceProgress implements IProgress {
 
     @Override
     public void setProgress(double progress) {
-        current = (long) progress * max;
+        current = (long) (progress * max);
         internal.setProgress(progress);
     }
 
     @Override
     public void inc(double increment) {
         setCurrent(current + (long) increment);
+    }
+
+    @Override
+    public void complete() {
+        internal.complete();
     }
 
     @Override

@@ -4,6 +4,7 @@ import io.r2dbc.h2.H2ConnectionConfiguration;
 import io.r2dbc.h2.H2ConnectionFactory;
 import io.r2dbc.h2.H2ConnectionOption;
 import io.r2dbc.spi.ConnectionFactory;
+import org.flywaydb.core.Flyway;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.Settings;
@@ -29,6 +30,18 @@ public class Database {
                         .property(H2ConnectionOption.DB_CLOSE_ON_EXIT, "true")
                         .build()
         );
+    }
+
+    public void migrate() {
+        Flyway.configure(this.getClass().getClassLoader())
+                .dataSource("jdbc:h2:file:" + settings.file(), settings.user(), settings.password())
+                .driver("org.h2.Driver")
+                .locations("classpath:db/migration")
+                .validateMigrationNaming(true)
+                .baselineOnMigrate(true)
+                .baselineVersion("0.0")
+                .load()
+                .migrate();
     }
 
     private DSLContext createContext(ConnectionFactory factory) {

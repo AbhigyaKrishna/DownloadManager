@@ -61,7 +61,7 @@ public class HistoryPage extends Screen {
         table.getColumnModel().getColumn(1).setPreferredWidth(320); // File Name column
         table.getColumnModel().getColumn(2).setPreferredWidth(300); // DateTime column
 
-        table.getColumnModel().getColumn(4).setPreferredWidth(350); // File Size column
+        table.getColumnModel().getColumn(3).setPreferredWidth(350); // File Size column
 
         // Set font for table cells
         table.setFont(new Font("Arial", Font.PLAIN, 14)); // Change font size for cell values
@@ -99,7 +99,7 @@ public class HistoryPage extends Screen {
             }
         });
 
-        Flux.from(ctx.select(Tables.HISTORY)).subscribe(record ->{
+        Flux.from(ctx.select().from(Tables.HISTORY)).subscribe(record -> {
             model.addRow(new String[]{
                     record.get(Tables.HISTORY.FILE_URL),
                     record.get(Tables.HISTORY.FILE_NAME),

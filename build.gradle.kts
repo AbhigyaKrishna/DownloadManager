@@ -49,7 +49,7 @@ dependencies {
     jooqGenerator("com.h2database:h2:$h2_version")
 }
 
-val databaseUrl = "jdbc:h2:${project.layout.buildDirectory.get().asFile}/schema-gen/database/database"
+val databaseUrl = "jdbc:h2:file:${project.layout.buildDirectory.get().asFile}/schema-gen/database/database"
 flyway {
     driver = "org.h2.Driver"
     user = "SA"
@@ -116,7 +116,6 @@ tasks {
 
     shadowJar {
         archiveFileName.set("DownloadManager-$version.jar")
-        minimize()
     }
 
     jar {
