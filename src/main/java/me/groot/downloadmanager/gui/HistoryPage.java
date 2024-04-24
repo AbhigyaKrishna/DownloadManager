@@ -1,5 +1,9 @@
 package me.groot.downloadmanager.gui;
 
+import me.groot.downloadmanager.jooq.codegen.Tables;
+import org.jooq.DSLContext;
+import reactor.core.publisher.Flux;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -9,9 +13,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class HistoryPage extends Screen {
-    public HistoryPage(){
+    private final DSLContext ctx;
+    public HistoryPage(DSLContext ctx){
         super("History");
+        this.ctx = ctx;
     }
+
 
     @Override
     public void initialize() {
@@ -20,19 +27,19 @@ public class HistoryPage extends Screen {
 
 
         // Data for the table
-        String [][] data = {
-                {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
-                {"https://www.yahoo.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
-                {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
-                {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
-                {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"}
-        };
+//        String [][] data = {
+//                {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
+//                {"https://www.yahoo.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
+//                {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
+//                {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"},
+//                {"https://www.google.com", "abc.xyz", "03.04.2024", "08:34:54", "23.43MB"}
+//        };
 
         // Column names
-        String[] columnNames = {"URL", "File Name", "Date", "Time", "File Size"};
+        String[] columnNames = {"URL", "File Name", "DateTime", "File Size"};
 
         // Create a default table model
-        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+        DefaultTableModel model = new DefaultTableModel(null, columnNames) {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 // Return the appropriate class for each column
@@ -52,8 +59,8 @@ public class HistoryPage extends Screen {
         // Set column widths
         table.getColumnModel().getColumn(0).setPreferredWidth(600); // URL column
         table.getColumnModel().getColumn(1).setPreferredWidth(320); // File Name column
-        table.getColumnModel().getColumn(2).setPreferredWidth(300); // Date column
-        table.getColumnModel().getColumn(3).setPreferredWidth(300); // Time column
+        table.getColumnModel().getColumn(2).setPreferredWidth(300); // DateTime column
+
         table.getColumnModel().getColumn(4).setPreferredWidth(350); // File Size column
 
         // Set font for table cells
@@ -90,6 +97,15 @@ public class HistoryPage extends Screen {
                 // Clear the table data
                 model.setRowCount(0);
             }
+        });
+
+        Flux.from(ctx.select(Tables.HISTORY)).subscribe(record ->{
+            model.addRow(new String[]{
+                    record.get(Tables.HISTORY.FILE_URL),
+                    record.get(Tables.HISTORY.FILE_NAME),
+                    record.get(Tables.HISTORY.FILE_DATETIME).toString(),
+                    String.format("%.2f MB",((double) record.get(Tables.HISTORY.FILE_SIZE)/1e+6))
+            });
         });
 
         // Create panel to hold the button

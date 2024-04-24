@@ -1,12 +1,39 @@
 package me.groot.downloadmanager.gui;
 
+import me.groot.downloadmanager.services.download.DownloadStrategy;
+import me.groot.downloadmanager.services.download.ResumableDownloadStrategy;
+import me.groot.downloadmanager.services.download.SplitDownloadStrategy;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SecondPage extends Screen {
+    private final String url;
+    private final String filename;
+    private final SplitDownloadStrategy strategy;
+    private final Thread thread;
 
-    public SecondPage() {
+    public SecondPage(String url,String filename) {
         super("DOWNLOAD MANAGER");
+        this.filename = filename;
+        this.url = url;
+        try {
+            this.strategy = new SplitDownloadStrategy(new URI(url).toURL(), Path.of(filename));
+            strategy.initialize();
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        this.thread = new Thread(this.strategy::download);
     }
 
     @Override
@@ -23,9 +50,10 @@ public class SecondPage extends Screen {
         panel.add(labelsPanel);
 
         // Add labels
-        JLabel linkbox = new JLabel("LINK:");
+        JLabel linkbox = new JLabel("Link: " + url);
         linkbox.setSize(400, 25);
         labelsPanel.add(linkbox);
+        DownloadStrategy.DownloadInfo info = strategy.getInfo();
 
         JLabel transferRateLabel = new JLabel("Transfer Rate: ");
         labelsPanel.add(transferRateLabel);
@@ -33,10 +61,10 @@ public class SecondPage extends Screen {
         JLabel timeLeftLabel = new JLabel("Time Left: ");
         labelsPanel.add(timeLeftLabel);
 
-        JLabel filesizeLabel = new JLabel("File Size: ");
+        JLabel filesizeLabel = new JLabel("File Size: "+ ((double) info.length()/1e+6)+ "MB");
         labelsPanel.add(filesizeLabel);
 
-        JLabel statusLabel = new JLabel("Status: ");
+        JLabel statusLabel = new JLabel("Status: Downloading");
         labelsPanel.add(statusLabel);
 
         // Create buttons panel with FlowLayout
@@ -79,17 +107,34 @@ public class SecondPage extends Screen {
         jb.setValue(1);
         jb.setStringPainted(true);
         panel.add(jb);
+        strategy.getProgress().flux().onBackpressureLatest().subscribe(new Subscribers(jb,this,statusLabel));
+
 
 
         pauseButton.addActionListener(e -> {
+            if (strategy.getProgress().isComplete())
+                return;
+            strategy.pause();
+            statusLabel.setText("Status: Paused");
             // Add your pause button action logic here
         });
 
         resumeButton.addActionListener(e -> {
-            // Add your resume button action logic here
+            if (strategy.getProgress().isComplete())
+                return;
+            strategy.resume();
+            statusLabel.setText("Status: Downloading");
+            //Add your resume button action logic here
         });
 
         progressCancelButton.addActionListener(e -> {
+            strategy.pause();
+            thread.interrupt();
+            try {
+                Files.delete(Path.of(filename));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             // Add your cancel button action logic here
         });
 
@@ -101,5 +146,47 @@ public class SecondPage extends Screen {
         setSize(400, 300);
         setLocationRelativeTo(null);
 
+    }
+
+    /*private void task(JLabel ){
+        service.submit(() -> {
+
+        })
+    }*/
+
+    static final class Subscribers implements Subscriber<Double> {
+        private final JProgressBar jb;
+
+        private Subscription s;
+        private final JFrame parentcomponent;
+        private final JLabel status;
+        public Subscribers(JProgressBar jb,JFrame parentcomponent, JLabel status){
+            this.parentcomponent = parentcomponent;
+            this.jb = jb;
+            this.status = status;
+        }
+
+        @Override
+        public void onSubscribe(Subscription s) {
+            s.request(1);
+            this.s = s;
+        }
+
+        @Override
+        public void onNext(Double aDouble) {
+           jb.setValue(aDouble.intValue());
+           s.request(1);
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            JOptionPane.showMessageDialog(parentcomponent,t.getMessage());
+        }
+
+        @Override
+        public void onComplete() {
+            jb.setValue(100);
+            status.setText("Status: Completed");
+        }
     }
 }

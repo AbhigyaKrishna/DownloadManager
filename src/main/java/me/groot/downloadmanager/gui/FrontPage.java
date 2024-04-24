@@ -1,5 +1,7 @@
 package me.groot.downloadmanager.gui;
 
+import me.groot.downloadmanager.database.Database;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,12 +10,12 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.net.URL;
 
-
 public class FrontPage extends Screen {
-    public FrontPage(){
+    private final Database db;
+    public FrontPage(Database db){
         super("DOWNLOAD MANAGER");
+        this.db = db;
     }
-
     @Override
     public void initialize() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -88,12 +90,18 @@ public class FrontPage extends Screen {
         gbc.gridy = 3; // Below the linkbox
         panel.add(download, gbc);
 
-        download.addActionListener(new DownloadButtonListener(linkbox,this));
+        download.addActionListener(new DownloadButtonListener(linkbox,this, fileNameField));
 
         JButton history = new JButton("<html><font size='4'>History</font></html>");
         history.setPreferredSize(new Dimension(120, 40)); // Set preferred size
         gbc.gridx = 0; // Left of the linkbox
         panel.add(history, gbc);
+
+        history.addActionListener(action -> {
+            HistoryPage hp = new HistoryPage(db.getContext());
+            hp.initialize();
+            hp.setVisible(true);
+        });
 
 
 
@@ -103,22 +111,19 @@ public class FrontPage extends Screen {
         pack(); // Adjusts the frame size to fit the components
         setLocationRelativeTo(null); // Centers the frame on the screen
 
-
-
     }
 
     final static class DownloadButtonListener implements ActionListener {
 
         private final JTextField linkbox;
-
-        //private final JTextField fileNameField;
+        private final JTextField fileNameField;
         private final JFrame parentcomponent;
 
-        public DownloadButtonListener(JTextField linkbox,JFrame parentcomponent) {
+        public DownloadButtonListener(JTextField linkbox,JFrame parentcomponent,JTextField fileNameField) {
             this.linkbox = linkbox;
             this.parentcomponent = parentcomponent;
+            this.fileNameField = fileNameField;
         }
-
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -126,9 +131,14 @@ public class FrontPage extends Screen {
                 JOptionPane.showMessageDialog(parentcomponent,"Enter a valid URL");
                 return;
             }
+            if(fileNameField.getText().isEmpty()){
+                JOptionPane.showMessageDialog(parentcomponent,"Enter a valid File Name ");
+                return;
+            }
 
-
-
+            SecondPage sp = new SecondPage(linkbox.getText(),fileNameField.getText());
+            sp.initialize();
+            sp.setVisible(true);
         }
     }
 }
